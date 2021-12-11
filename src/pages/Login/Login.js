@@ -1,16 +1,37 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import LanguageOutlinedIcon from "@material-ui/icons/LanguageOutlined";
 import "./Login.css";
 import ButtonPrimary from "../../components/ButtonPrimary/ButtonPrimary";
 import ButtonSecondary from "../../components/ButtonSecondary/ButtonSecondary";
+import { auth } from "../../firebase/firebase";
+import { useDispatch } from "react-redux";
+import { login } from "../../features/userSlice";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const signIn = (e) => {
     e.preventDefault();
+
+    auth
+      .signInWithEmailAndPassword(email, password)
+      .then((userAuth) => {
+        dispatch(
+          login({
+            email: userAuth.user.email,
+            uid: userAuth.user.uid,
+            displayName: userAuth.user.displayName,
+          })
+        );
+        navigate("/teslaaccount");
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
   };
 
   return (
@@ -53,7 +74,7 @@ const Login = () => {
           <span>OR</span>
           <hr />
         </div>
-        <Link to="/sign up">
+        <Link to="/signup">
           <ButtonSecondary name="create account" />
         </Link>
       </div>
